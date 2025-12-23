@@ -1,0 +1,6 @@
+Métrique,Valeur
+Recovery Rate (%),47.2
+True Class Confidence Gain,0.3199879394987729
+Top-5 Recall Patched (%),61.2
+Top-5 Recall Defended (%),98.8
+Top-5 Gain (%),37.599999999999994
