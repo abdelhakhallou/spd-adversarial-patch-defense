@@ -8,19 +8,19 @@ def generate_patch_heatmap(img_tensor,
                            sat_power=1.5, 
                            hf_weight=1.0, 
                            blur_kernel=(5, 5)):
-    """Génère la heatmap de suspicion de présence d'un adversarial patch.
+    """Generate the suspicion heatmap for adversarial patch presence.
     
-    Paramètres configurables :
-    - window_size : 50 (taille du patch)
-    - stride : 10 (heatmap smooth, valeurs possibles : 5, 10, 15, 20)
-    - sat_power : 1.5 (amplification saturation, valeurs possibles : 1.0, 1.5, 2.0)
-    - hf_weight : 1.0 (poids hautes fréquences, valeurs possibles : 0.5, 1.0, 2.0)
-    - blur_kernel : (5,5) (lissage final, None pour désactiver)
+    Configurable parameters:
+    - window_size: 50 (patch size)
+    - stride: 10 (controls heatmap smoothness; possible values: 5, 10, 15, 20)
+    - sat_power: 1.5 (saturation amplification; possible values: 1.0, 1.5, 2.0)
+    - hf_weight: 1.0 (high-frequency weight; possible values: 0.5, 1.0, 2.0)
+    - blur_kernel: (5,5) (final smoothing; None to disable)
     
-    Retour :
-    - heatmap_norm : numpy uint8 (H, W) – valeurs 0-255
+    Returns:
+    - heatmap_norm: numpy uint8 (H, W) – values in [0, 255]
     """
-    # Conversion en uint8 avec couleurs fidèles
+    # Convert to uint8 preserving original colors
     img_np = img_tensor.cpu().numpy().transpose(1, 2, 0)
     img_uint8 = np.clip(img_np * 255, 0, 255).astype(np.uint8)
     
@@ -33,7 +33,7 @@ def generate_patch_heatmap(img_tensor,
             gray = cv2.cvtColor(window, cv2.COLOR_RGB2GRAY).astype(np.float32)
             saturation = cv2.cvtColor(window, cv2.COLOR_RGB2HSV)[:, :, 1].astype(np.float32)
             
-            var = np.var(gray)
+            var_intensity = np.var(gray)
             gx = cv2.Sobel(gray, cv2.CV_32F, 1, 0, ksize=3)
             gy = cv2.Sobel(gray, cv2.CV_32F, 0, 1, ksize=3)
             grad_mag = np.sqrt(gx**2 + gy**2)
@@ -41,9 +41,9 @@ def generate_patch_heatmap(img_tensor,
             mean_sat = np.mean(saturation) / 255.0
             
             dct_window = dct(dct(gray.T, norm='ortho').T, norm='ortho')
-            high_freq = np.sum(np.abs(dct_window[10:, 10:]))
+            high_freq_energy = np.sum(np.abs(dct_window[10:, 10:]))
             
-            score = var * mean_grad * (mean_sat ** sat_power) * (high_freq ** hf_weight)
+            score = var_intensity * mean_grad * (mean_sat ** sat_power) * (high_freq_energy ** hf_weight)
             
             heatmap[y:y+window_size, x:x+window_size] = np.maximum(
                 heatmap[y:y+window_size, x:x+window_size], score)

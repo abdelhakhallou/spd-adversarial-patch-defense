@@ -12,33 +12,30 @@ def mitigate_adversarial_patch(img_tensor,
                                inpaint_radius=5,
                                return_mask=False,
                                return_heatmap=False):
-    """Mitige un adversarial patch : détection + suppression + inpainting.
+    """Mitigate an adversarial patch through detection, mask refinement, and inpainting.
     
-    Reproduit exactement l'algo original qui fonctionne parfaitement.
+    Parameters:
+    - img_tensor: PyTorch tensor (3, 224, 224) – patched input (may be normalized).
+    - fixed_thresh: 240 (threshold on normalized heatmap).
+    - opening/dilation kernels and iterations: morphological operations.
+    - inpaint_radius: 5 (Telea inpainting).
+    - return_mask/heatmap: optional debug outputs.
     
-    Paramètres :
-    - img_tensor : tensor PyTorch (3, 224, 224) – patched (peut être normalisé ou non)
-    - fixed_thresh : 240 (valeur optimale pour garder rouge/orange foncé)
-    - opening/dilation : morphologie comme l'original
-    - inpaint_radius : 5 (TELEA)
-    - return_mask/heatmap : pour debug
-    
-    Retour :
-    - cleaned_uint8 : image nettoyée (numpy uint8 RGB)
-    - mask (optionnel)
-    - heatmap_norm (optionnel)
+    Returns:
+    - cleaned_rgb: defended image (numpy uint8 RGB).
+    - mask and/or heatmap_norm if requested.
     """
-    # Conversion en uint8 couleurs fidèles
+    # Convert to uint8 preserving colors
     img_np = img_tensor.cpu().numpy().transpose(1, 2, 0)
     img_uint8 = np.clip(img_np * 255, 0, 255).astype(np.uint8)
     
-    # Heatmap via le module detection
+    # Suspicion heatmap
     heatmap_norm = generate_patch_heatmap(img_tensor)
     
-    # Seuillage fixe
+    # Binary thresholding
     _, thresh = cv2.threshold(heatmap_norm, fixed_thresh, 255, cv2.THRESH_BINARY)
     
-    # Morphologie
+    # Morphological refinement
     kernel_open = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, opening_kernel)
     mask = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel_open, iterations=opening_iterations)
     kernel_dilate = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, dilation_kernel)

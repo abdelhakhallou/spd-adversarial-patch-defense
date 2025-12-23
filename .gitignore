@@ -7,17 +7,11 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Virtual environments (si jamais)
-env/
-venv/
-.venv/
+# Generated evaluation outputs – DO NOT commit
+evaluations/
+examples_visual/
+results/
 
 # OS files
 .DS_Store
 Thumbs.db
-
-# Large files / datasets (optionnel, à adapter plus tard si besoin)
-*.zip
-*.tar
-*.gz
-data/raw/
