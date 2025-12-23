@@ -1,0 +1,23 @@
+# Colab specifics
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments (si jamais)
+env/
+venv/
+.venv/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Large files / datasets (optionnel, à adapter plus tard si besoin)
+*.zip
+*.tar
+*.gz
+data/raw/
